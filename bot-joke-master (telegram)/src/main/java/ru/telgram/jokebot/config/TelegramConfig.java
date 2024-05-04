@@ -14,7 +14,5 @@ public class TelegramConfig {
     @Bean
     TelegramBot telegramBot() {
         return new TelegramBot(telegramToken); //Создаем и передаем нашего бота как бин в Spring
-
-
     }
 }

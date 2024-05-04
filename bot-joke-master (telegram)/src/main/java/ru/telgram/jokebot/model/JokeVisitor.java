@@ -3,7 +3,6 @@ package ru.telgram.jokebot.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Date;
 
 @EqualsAndHashCode()

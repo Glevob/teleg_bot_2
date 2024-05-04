@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,20 +30,11 @@ public class Joke {
     @Column(name = "updatedAt")
     private Date updatedAt;
 
-    @Column(name = "callCount")
-    private int callCount;
-
-    public Joke(String text, Date createdAt){
+    public Joke(String text, Date createdAt) {
         this.text = text;
         this.createdAt = createdAt;
-        this.callCount = 0;
     }
 
-    public int getLikes() {
-        return callCount; // Популярность определена как количество вызовов
-    }
-
-    public void increaseCallCount() {
-        callCount++;
-    }
+    @OneToMany(mappedBy = "jokeId", cascade = CascadeType.ALL)
+    private List<JokeVisitor> jokeVisitor;
 }

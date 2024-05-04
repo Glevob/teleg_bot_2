@@ -2,12 +2,15 @@ package ru.telgram.jokebot.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.telgram.jokebot.model.Joke;
+import ru.telgram.jokebot.model.JokeVisitor;
 import ru.telgram.jokebot.repository.JokesRepository;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -31,9 +34,12 @@ public class JokeServiceImpl implements JokeService {
 
     @Override
     public Optional<Joke> getJokeById(Long id) {
-        Optional<Joke> joke = jokesRepository.findById(id);
-        joke.ifPresent(Joke::increaseCallCount); // Увеличение частоты появления шутки
-        return joke;
+        Optional<Joke> jokeOptional = jokesRepository.findById(id);
+        jokeOptional.ifPresent(joke -> {
+            joke.getJokeVisitor().add(new JokeVisitor(null, joke, new Date()));
+            jokesRepository.saveAndFlush(joke);
+        });
+        return jokeOptional;
     }
 
     @Override
@@ -58,36 +64,22 @@ public class JokeServiceImpl implements JokeService {
 
     @Override
     public Joke getRandomJoke() {
-        long count = jokesRepository.count();
-        if (count == 0) {
-            return null;
-        }
-        Random random = new Random();
-        int randomIndex = random.nextInt((int) count);
-        Page<Joke> page = jokesRepository.findAll(PageRequest.of(randomIndex, 1));
-        return page.getContent().get(0);
+        return jokesRepository.findRandomJoke(); // Используем метод из репозитория
     }
 
 
+
+    // Метод для page всех шуток
     @Override
-    public void logJokeCall(Long userId, Long jokeId) {
-        Optional<Joke> joke = jokesRepository.findById(jokeId);
-        joke.ifPresent(Joke::increaseCallCount); // Увеличение частоты появления шутки при вызове
-    }
-    @Override
-    public int getLikes(Long id) {
-        Optional<Joke> optionalJoke = getJokeById(id);
-        return optionalJoke.map(Joke::getLikes).orElse(0);
+    public Page<Joke> getJokes(Pageable pageable) {
+        return jokesRepository.findAll(pageable);
     }
 
-    // Метод для получения топ 5 шуток
+    // Метод для page топ-5 шуток по количеству посетителей
     @Override
-    public List<Joke> getTop5Jokes() {
-        List<Joke> top5Jokes = jokesRepository.findAll()
-                .stream()
-                .sorted(Comparator.comparingInt(joke -> -getLikes(joke.getId())))
-                .limit(5)
-                .collect(Collectors.toList());
-        return top5Jokes;
+    public Page<Joke> getTopJokes(Pageable pageable) {
+        return jokesRepository.findByOrderByJokeVisitorDesc(pageable);
     }
+
+
 }

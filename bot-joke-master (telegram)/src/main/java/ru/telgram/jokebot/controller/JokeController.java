@@ -1,10 +1,13 @@
 package ru.telgram.jokebot.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.telgram.jokebot.model.Joke;
 import ru.telgram.jokebot.service.JokeService;
+import ru.telgram.jokebot.service.TelegramBotService;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +18,7 @@ import java.util.List;
 public class JokeController {
 
     private final JokeService jokeService;
-    //private final TelegramBotService telegramBotService; // Внедряем TelegramBotService
+    private final TelegramBotService telegramBotService; // Внедряем TelegramBotService
 
     //POST /jokes - создание новой шутки
     @PostMapping
@@ -27,10 +30,9 @@ public class JokeController {
 
     //GET /jokes - выдача всех шуток
     @GetMapping
-    ResponseEntity<List<Joke>> getJokes(){
-        return ResponseEntity.ok(jokeService.getAllJokes());
+    public ResponseEntity<Page<Joke>> getJokes(Pageable pageable) {
+        return ResponseEntity.ok(jokeService.getJokes(pageable));
     }
-
 
     //GET /jokes/id - выдача шутки с определенным id
     @GetMapping("/{id}")
@@ -58,17 +60,8 @@ public class JokeController {
         return ResponseEntity.ok().build();
     }
 
-    // POST /jokes/{userId}/call - регистрация вызова анекдота пользователем
-    @PostMapping("/{userId}/call")
-    ResponseEntity<Void> logJokeCall(@PathVariable Long userId, Long jokeId) {
-        jokeService.logJokeCall(userId, jokeId);
-        return ResponseEntity.ok().build();
+    @GetMapping("/top")
+    public ResponseEntity<Page<Joke>> getTopJokes(Pageable pageable) {
+        return ResponseEntity.ok(jokeService.getTopJokes(pageable));
     }
-
-    /*// GET /jokes/top5 - получение топ-5 самых популярных анекдотов
-    @GetMapping("/top5")
-    ResponseEntity<List<Joke>> getTop5Jokes() {
-        List<Joke> top5Jokes = jokeService.getTop5Jokes();
-        return ResponseEntity.ok(top5Jokes);
-    }*/
 }

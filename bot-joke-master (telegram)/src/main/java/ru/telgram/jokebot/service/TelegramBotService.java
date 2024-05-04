@@ -6,6 +6,8 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.telgram.jokebot.model.Joke;
@@ -35,11 +37,9 @@ public class TelegramBotService {
             if ("/start".equals(messageText)) {
                 sendStartMessage(chatId);
             } else if ("Все шутки".equals(messageText)) {
-                sendAllJokes(chatId);
+                sendAllJokes(chatId, 0, 10); // Первая страница, 10 шуток
             } else if ("Случайная шутка".equals(messageText)) {
                 sendRandomJoke(chatId);
-            } else if ("Топ-5 анекдотов".equals(messageText)) {
-                sendTop5Jokes(chatId);
             } else if ("Выбрать шутку по id".equals(messageText)) {
                 sendSelectJokeByIdMessage(chatId);
             } else if (isNumeric(messageText)) {
@@ -102,56 +102,39 @@ public class TelegramBotService {
         telegramBot.execute(request);
     }
 
-    private void sendAllJokes(long chatId) {
+    private void sendAllJokes(long chatId, int page, int size) {
+        Page<Joke> jokesPage = jokeService.getJokes(PageRequest.of(page, size)); // Используем пагинацию
         StringBuilder stringBuilder = new StringBuilder();
-        List<Joke> jokes = jokeService.getAllJokes();
-        for (Joke joke : jokes) {
+
+        jokesPage.forEach(joke -> {
             stringBuilder.append(joke.getId()).append(". ").append(joke.getText()).append("\n");
-        }
+        });
 
         SendMessage request = new SendMessage(chatId, stringBuilder.toString())
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true)
                 .disableNotification(true);
+
         telegramBot.execute(request);
     }
 
     private void sendRandomJoke(long chatId) {
         Joke randomJoke = jokeService.getRandomJoke();
         if (randomJoke != null) {
-            SendMessage request = new SendMessage(chatId, randomJoke.getId() + ". " + randomJoke.getText())
-                    .parseMode(ParseMode.HTML)
-                    .disableWebPagePreview(true)
-                    .disableNotification(true);
-            telegramBot.execute(request);
-        } else {
-            SendMessage request = new SendMessage(chatId, "Извините, нет доступных анекдотов")
+            SendMessage request = new SendMessage(chatId, randomJoke.getText())
                     .parseMode(ParseMode.HTML)
                     .disableWebPagePreview(true)
                     .disableNotification(true);
             telegramBot.execute(request);
         }
     }
-    private void sendTop5Jokes(long chatId) {
-        List<Joke> top5Jokes = jokeService.getTop5Jokes();
-        if (!top5Jokes.isEmpty()) {
-            StringBuilder messageText = new StringBuilder("Топ 5 самых популярных анекдотов:\n");
-            for (int i = 0; i < top5Jokes.size(); i++) {
-                messageText.append(i+1).append(". ").append(top5Jokes.get(i).getText()).append("\n");
-            }
 
-            SendMessage request = new SendMessage(chatId, messageText.toString())
-                    .parseMode(ParseMode.HTML)
-                    .disableWebPagePreview(true)
-                    .disableNotification(true);
-            telegramBot.execute(request);
-        } else {
-            SendMessage request = new SendMessage(chatId, "Извините, нет популярных анекдотов")
-                    .parseMode(ParseMode.HTML)
-                    .disableWebPagePreview(true)
-                    .disableNotification(true);
-            telegramBot.execute(request);
-        }
+    private void sendUnknownCommand(long chatId) {
+        SendMessage request = new SendMessage(chatId, "Неизвестная команда.")
+                .parseMode(ParseMode.HTML)
+                .disableWebPagePreview(true)
+                .disableNotification(true);
+        telegramBot.execute(request);
     }
 
 }
