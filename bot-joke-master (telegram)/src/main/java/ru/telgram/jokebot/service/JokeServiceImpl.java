@@ -3,19 +3,15 @@ package ru.telgram.jokebot.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.telgram.jokebot.model.Joke;
 import ru.telgram.jokebot.model.JokeVisitor;
 import ru.telgram.jokebot.repository.JokesRepository;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
-import java.util.stream.Collectors;
-
+//(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
 @RequiredArgsConstructor
 @Service
 public class JokeServiceImpl implements JokeService {

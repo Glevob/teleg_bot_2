@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1713613729582-12
+      author: Art (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+  - changeSet:
+      id: 1713613729582-11
+      author: pasvitas (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: orders
+            constraintName: FK_ORDERS_ON_USERS
+            referencedColumnNames: id
+            referencedTableName: users

@@ -4,11 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.telgram.jokebot.model.Joke;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 public interface JokeService {
 
     void registerJoke(Joke joke);
