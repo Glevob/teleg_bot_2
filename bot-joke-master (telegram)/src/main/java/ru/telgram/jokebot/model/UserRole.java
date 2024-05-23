@@ -19,15 +19,6 @@ public class UserRole implements GrantedAuthority {
     @SequenceGenerator(name = "user_role_id_seq", sequenceName = "user_role_id_seq", allocationSize = 1)
     private Long id;
 
-    /*
-    @Enumerated
-    private UserAuthority userAuthority;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-*/
 
     @Column(name = "role")
     private String authority;
